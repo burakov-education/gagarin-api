@@ -6,6 +6,7 @@ use App\Http\Requests\AuthRequest;
 use App\Http\Requests\RegistrationRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class AuthController extends Controller
 {
@@ -31,7 +32,13 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function authorization(AuthRequest $request)
+    /**
+     * Auth
+     *
+     * @param AuthRequest $request
+     * @return JsonResponse
+     */
+    public function authorization(AuthRequest $request): JsonResponse
     {
         if (auth()->attempt($request->validated())) {
             /** @var User $user */
@@ -45,7 +52,7 @@ class AuthController extends Controller
                         'birth_date' => $user->birth_date,
                         'email' => $user->email,
                     ],
-                    'token' => '',
+                    'token' => $user->createToken('api')->plainTextToken,
                 ],
             ]);
         }
@@ -54,5 +61,17 @@ class AuthController extends Controller
             'code' => 401,
             'message' => 'Login failed',
         ], 401);
+    }
+
+    /**
+     * Logout
+     *
+     * @return Response
+     */
+    public function logout(): Response
+    {
+        auth()->user()->currentAccessToken()->delete();
+
+        return response()->noContent();
     }
 }
