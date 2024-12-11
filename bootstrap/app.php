@@ -16,5 +16,38 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+//        $exceptions->render(function (Exception $exception) {
+//            dd($exception);
+//        });
+
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $exception) {
+            return response()->json([
+                'code' => 401,
+                'message' => 'Login failed',
+            ], 401);
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $exception) {
+            return response()->json([
+                'code' => 403,
+                'message' => 'Forbidden for you',
+            ], 403);
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $exception) {
+            return response()->json([
+                'message' => 'Not found',
+                'code' => 404,
+            ], 404);
+        });
+
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $exception) {
+            return response()->json([
+                'error' => [
+                    'code' => 422,
+                    'message' => 'Validation error',
+                    'errors' => $exception->errors(),
+                ],
+            ], 422);
+        });
     })->create();

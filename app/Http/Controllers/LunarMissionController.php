@@ -4,13 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LunarMissionRequest;
 use App\Http\Resources\LunarMissionResource;
+use App\Http\Resources\LunarMissionSearchResource;
 use App\Models\LunarMission;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
 class LunarMissionController extends Controller
 {
+    public function search()
+    {
+        $searchString = request()->input('query');
+
+        // $missions = LunarMission::query()->where('user_id', auth()->id())...;
+        /** @var User $user */
+        $user = auth()->user();
+        $missions = $user->lunarMissions()
+            ->where('name', 'like', '%' . $searchString . '%')
+            ->orWhere('spacecraft', 'like', '%' . $searchString . '%');
+
+        return LunarMissionSearchResource::collection($missions->get());
+    }
+
     /**
      * Create lunar mission
      *
