@@ -7,13 +7,19 @@ use App\Http\Resources\LunarMissionResource;
 use App\Http\Resources\LunarMissionSearchResource;
 use App\Models\LunarMission;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
 class LunarMissionController extends Controller
 {
-    public function search()
+    /**
+     * Search missions
+     *
+     * @return AnonymousResourceCollection
+     */
+    public function search(): AnonymousResourceCollection
     {
         $searchString = request()->input('query');
 
@@ -21,8 +27,10 @@ class LunarMissionController extends Controller
         /** @var User $user */
         $user = auth()->user();
         $missions = $user->lunarMissions()
-            ->where('name', 'like', '%' . $searchString . '%')
-            ->orWhere('spacecraft', 'like', '%' . $searchString . '%');
+            ->where(function (Builder $builder) use ($searchString) {
+                $builder->where('name', 'like', '%' . $searchString . '%')
+                    ->orWhere('spacecraft', 'like', '%' . $searchString . '%');
+            });
 
         return LunarMissionSearchResource::collection($missions->get());
     }
