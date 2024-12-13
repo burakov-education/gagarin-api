@@ -22,6 +22,7 @@ class LunarMissionResource extends JsonResource
 
         return [
             'mission' => [
+                'id' => $this->id,
                 'name' => $this->name,
                 'launch_details' => $this->launch_details,
                 'landing_details' => $this->landing_details,
